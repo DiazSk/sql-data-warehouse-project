@@ -1,0 +1,17 @@
+# =============================================================================
+# Olist Data Warehouse - Python Dependencies
+# =============================================================================
+# Install with: pip install -r requirements.txt
+# =============================================================================
+
+# HTTP requests for API calls
+requests>=2.28.0
+
+# PostgreSQL database connector
+psycopg2-binary>=2.9.0
+
+# Data manipulation (if needed later)
+pandas>=1.5.0
+
+# Environment variable management
+python-dotenv>=1.0.0
