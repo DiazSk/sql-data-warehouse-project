@@ -313,8 +313,9 @@ COMMENT ON COLUMN bronze.olist_closed_deals.declared_monthly_revenue IS 'Self-re
 -- ----------------------------------------------------------------------------
 -- Table 12: api_currency_rates
 -- Description: Daily BRL to USD exchange rates
--- Source: ExchangeRate-API (open.er-api.com)
--- Record Count: ~790 (one per day from Sep 2016 - Oct 2018)
+-- Source: Frankfurter API (api.frankfurter.app) - European Central Bank data
+-- API Docs: https://www.frankfurter.app/docs/
+-- Record Count: ~550 (business days from Sep 2016 - Oct 2018)
 -- ----------------------------------------------------------------------------
 DROP TABLE IF EXISTS bronze.api_currency_rates;
 
@@ -324,10 +325,10 @@ CREATE TABLE bronze.api_currency_rates (
     target_currency VARCHAR(5),
     exchange_rate VARCHAR(20),
     dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dwh_source_file VARCHAR(255) DEFAULT 'exchangerate_api'
+    dwh_source_file VARCHAR(255) DEFAULT 'frankfurter_api'
 );
 
-COMMENT ON TABLE bronze.api_currency_rates IS 'Raw currency exchange rates from ExchangeRate-API';
+COMMENT ON TABLE bronze.api_currency_rates IS 'Raw currency exchange rates from Frankfurter API (European Central Bank data)';
 COMMENT ON COLUMN bronze.api_currency_rates.exchange_rate IS 'Exchange rate: 1 BRL = X USD';
 
 -- ----------------------------------------------------------------------------
@@ -350,11 +351,16 @@ CREATE TABLE bronze.api_brazil_holidays (
     dwh_source_file VARCHAR(255) DEFAULT 'nager_date_api'
 );
 
+COMMENT ON TABLE bronze.api_brazil_holidays IS 'Raw Brazilian public holidays from Nager.Date API';
+COMMENT ON COLUMN bronze.api_brazil_holidays.local_name IS 'Holiday name in Portuguese';
+COMMENT ON COLUMN bronze.api_brazil_holidays.holiday_name IS 'Holiday name in English';
+
 -- ----------------------------------------------------------------------------
 -- Table 14: api_weather_history
--- Description: Historical weather data by location
--- Source: Open-Meteo API (open-meteo.com)
--- Record Count: Variable (~21K for state capitals approach)
+-- Description: Historical weather data by location (Daily aggregates - Minimal)
+-- Source: Open-Meteo Historical Weather API (archive-api.open-meteo.com)
+-- API Docs: https://open-meteo.com/en/docs/historical-weather-api
+-- Record Count: ~21K (27 state capitals × ~790 days)
 -- ----------------------------------------------------------------------------
 DROP TABLE IF EXISTS bronze.api_weather_history;
 
@@ -370,6 +376,11 @@ CREATE TABLE bronze.api_weather_history (
     dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dwh_source_file VARCHAR(255) DEFAULT 'open_meteo_archive_api'
 );
+
+COMMENT ON TABLE bronze.api_weather_history IS 'Raw historical daily weather data from Open-Meteo Archive API (minimal columns for business analysis)';
+COMMENT ON COLUMN bronze.api_weather_history.weather_code IS 'WMO weather code: 0=Clear, 1-3=Cloudy, 45-48=Fog, 51-55=Drizzle, 61-65=Rain, 71-77=Snow, 80-82=Showers, 95-99=Thunderstorm';
+COMMENT ON COLUMN bronze.api_weather_history.precipitation_sum IS 'Total daily precipitation (rain + showers + snowfall) in millimeters';
+COMMENT ON COLUMN bronze.api_weather_history.temperature_2m_mean IS 'Mean daily air temperature at 2 meters above ground in Celsius';
 
 -- ============================================================================
 -- SECTION 4: VERIFICATION QUERIES
@@ -417,7 +428,5 @@ BEGIN
     RAISE NOTICE '';
     RAISE NOTICE '========================================';
     RAISE NOTICE 'Total: 14 tables created';
-    RAISE NOTICE '========================================';
-    RAISE NOTICE 'Next step: Run load_bronze_data.sql';
     RAISE NOTICE '========================================';
 END $$;
