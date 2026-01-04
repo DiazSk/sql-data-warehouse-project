@@ -45,7 +45,7 @@ SET search_path TO bronze, public;
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
--- TABLE 1: olist_customers
+-- TABLE 1: olist_orders
 -- Description: Core order information - one row per order
 -- Source File: olist_orders_dataset.csv
 -- ----------------------------------------------------------------------------
@@ -142,27 +142,27 @@ COMMENT ON COLUMN bronze.olist_order_reviews.review_score IS 'Rating from 1 (wor
 COMMENT ON COLUMN bronze.olist_order_reviews.review_comment_message IS 'Optional review text (often NULL)';
 
 -- ----------------------------------------------------------------------------
--- Table 5: olist_customers
+-- Table 5: olist_order_customer
 -- Description: Customer information - one row per order-customer combination
--- Source File: olist_customers_dataset.csv
+-- Source File: olist_order_customer_dataset.csv
 -- Record Count: ~99,441
 -- NOTE: customer_id is per-order; use customer_unique_id for true unique customers
 -- ----------------------------------------------------------------------------
-DROP TABLE IF EXISTS bronze.olist_customers;
+DROP TABLE IF EXISTS bronze.olist_order_customer;
 
-CREATE TABLE bronze.olist_customers (
+CREATE TABLE bronze.olist_order_customer (
     customer_id VARCHAR(50),
     customer_unique_id VARCHAR(50),
     customer_zip_code_prefix VARCHAR(50),
     customer_city VARCHAR(100),
     customer_state VARCHAR(50),
     dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dwh_source_file VARCHAR(255) DEFAULT 'olist_customers_dataset.csv'
+    dwh_source_file VARCHAR(255) DEFAULT 'olist_order_customer_dataset.csv'
 );
 
-COMMENT ON TABLE bronze.olist_customers IS 'Raw customer data - customer_id is per-order, customer_unique_id is truly unique';
-COMMENT ON COLUMN bronze.olist_customers.customer_id IS 'Order-specific customer ID (FK from orders)';
-COMMENT ON COLUMN bronze.olist_customers.customer_unique_id IS 'True unique customer identifier for deduplication';
+COMMENT ON TABLE bronze.olist_order_customer IS 'Raw customer data - customer_id is per-order, customer_unique_id is truly unique';
+COMMENT ON COLUMN bronze.olist_order_customer.customer_id IS 'Order-specific customer ID (FK from orders)';
+COMMENT ON COLUMN bronze.olist_order_customer.customer_unique_id IS 'True unique customer identifier for deduplication';
 
 -- ----------------------------------------------------------------------------
 -- Table 6: olist_geolocation
@@ -411,7 +411,7 @@ BEGIN
     RAISE NOTICE '  2. bronze.olist_order_items';
     RAISE NOTICE '  3. bronze.olist_order_payments';
     RAISE NOTICE '  4. bronze.olist_order_reviews';
-    RAISE NOTICE '  5. bronze.olist_customers';
+    RAISE NOTICE '  5. bronze.olist_order_customer';
     RAISE NOTICE '  6. bronze.olist_geolocation';
     RAISE NOTICE '  7. bronze.olist_products';
     RAISE NOTICE '  8. bronze.olist_category_translation';

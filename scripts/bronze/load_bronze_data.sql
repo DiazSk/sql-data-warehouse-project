@@ -142,9 +142,9 @@ SELECT 'olist_order_reviews' as table_name, COUNT(*) as row_count FROM bronze.ol
 -- ----------------------------------------------------------------------------
 -- Table 5: olist_customers (~99,441 rows)
 -- ----------------------------------------------------------------------------
-TRUNCATE TABLE bronze.olist_customers;
+TRUNCATE TABLE bronze.olist_order_customer;
 
-COPY bronze.olist_customers (
+COPY bronze.olist_order_customer (
     customer_id,
     customer_unique_id,
     customer_zip_code_prefix,
@@ -154,9 +154,9 @@ COPY bronze.olist_customers (
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_customers_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
-UPDATE bronze.olist_customers SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
+UPDATE bronze.olist_order_customer SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
-SELECT 'olist_customers' as table_name, COUNT(*) as row_count FROM bronze.olist_customers;
+SELECT 'olist_customers' as table_name, COUNT(*) as row_count FROM bronze.olist_order_customer;
 
 -- ----------------------------------------------------------------------------
 -- Table 6: olist_geolocation (~1,000,163 rows) - LARGEST TABLE
@@ -335,7 +335,7 @@ BEGIN
     SELECT COUNT(*) INTO v_count FROM bronze.olist_order_reviews;
     RAISE NOTICE 'olist_order_reviews: % rows', v_count;
 
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_customers;
+    SELECT COUNT(*) INTO v_count FROM bronze.olist_order_customer;
     RAISE NOTICE 'olist_customers: % rows', v_count;
 
     SELECT COUNT(*) INTO v_count FROM bronze.olist_geolocation;
@@ -380,7 +380,7 @@ SELECT 'Orders with NULL order_id' as check_name, COUNT(*) as count
 FROM bronze.olist_orders WHERE order_id IS NULL;
 
 SELECT 'Customers with NULL customer_id' as check_name, COUNT(*) as count
-FROM bronze.olist_customers WHERE customer_id IS NULL;
+FROM bronze.olist_order_customer WHERE customer_id IS NULL;
 
 SELECT 'Products with NULL product_id' as check_name, COUNT(*) as count
 FROM bronze.olist_products WHERE product_id IS NULL;
