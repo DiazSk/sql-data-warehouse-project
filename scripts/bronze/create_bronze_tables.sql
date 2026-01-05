@@ -14,8 +14,7 @@ BRONZE LAYER PRINCIPLES:
 ------------------------
 1. Store data EXACTLY as received from source (no transformations)
 2. All columns are VARCHAR to prevent load failures from data type issues
-3. Include technical metadata columns (dwh_load_date, dwh_source_file)
-4. Use TRUNCATE & INSERT for full loads (no incremental)
+3. Use TRUNCATE & INSERT for full loads (no incremental)
 
 NAMING CONVENTION:
 ------------------

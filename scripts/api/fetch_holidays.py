@@ -28,7 +28,6 @@ pip install requests psycopg2-binary
 
 import requests
 import psycopg2
-from datetime import datetime
 import time
 import os
 from dotenv import load_dotenv
