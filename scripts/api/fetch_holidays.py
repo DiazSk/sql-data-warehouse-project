@@ -135,16 +135,11 @@ def insert_holidays(cursor, holidays: list):
             country_code,
             is_fixed,
             is_global,
-            holiday_types,
-            dwh_load_date,
-            dwh_source_file
+            holiday_types
         ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s
         );
     """
-
-    load_timestamp = datetime.now()
-    source_file = "nager_date_api"
 
     for holiday in holidays:
         # Extract and transform data
@@ -169,8 +164,6 @@ def insert_holidays(cursor, holidays: list):
                 is_fixed,
                 is_global,
                 holiday_types,
-                load_timestamp,
-                source_file,
             ),
         )
 

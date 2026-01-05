@@ -71,9 +71,6 @@ COPY bronze.olist_orders (
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_orders_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
-UPDATE bronze.olist_orders SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
 -- Verify load
 SELECT 'olist_orders' as table_name, COUNT(*) as row_count FROM bronze.olist_orders;
 
@@ -94,8 +91,6 @@ COPY bronze.olist_order_items (
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_order_items_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
-UPDATE bronze.olist_order_items SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
 SELECT 'olist_order_items' as table_name, COUNT(*) as row_count FROM bronze.olist_order_items;
 
 -- ----------------------------------------------------------------------------
@@ -112,8 +107,6 @@ COPY bronze.olist_order_payments (
 )
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_order_payments_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
-
-UPDATE bronze.olist_order_payments SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
 SELECT 'olist_order_payments' as table_name, COUNT(*) as row_count FROM bronze.olist_order_payments;
 
@@ -135,8 +128,6 @@ COPY bronze.olist_order_reviews (
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_order_reviews_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '', QUOTE '"', ESCAPE '"');
 
-UPDATE bronze.olist_order_reviews SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
 SELECT 'olist_order_reviews' as table_name, COUNT(*) as row_count FROM bronze.olist_order_reviews;
 
 -- ----------------------------------------------------------------------------
@@ -153,8 +144,6 @@ COPY bronze.olist_order_customer (
 )
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_customers_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
-
-UPDATE bronze.olist_order_customer SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
 SELECT 'olist_customers' as table_name, COUNT(*) as row_count FROM bronze.olist_order_customer;
 
@@ -173,8 +162,6 @@ COPY bronze.olist_geolocation (
 )
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_geolocation_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
-
-UPDATE bronze.olist_geolocation SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
 SELECT 'olist_geolocation' as table_name, COUNT(*) as row_count FROM bronze.olist_geolocation;
 
@@ -197,8 +184,6 @@ COPY bronze.olist_products (
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_products_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
-UPDATE bronze.olist_products SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
 SELECT 'olist_products' as table_name, COUNT(*) as row_count FROM bronze.olist_products;
 
 -- ----------------------------------------------------------------------------
@@ -212,8 +197,6 @@ COPY bronze.olist_category_translation (
 )
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\product_category_name_translation.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
-
-UPDATE bronze.olist_category_translation SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
 SELECT 'olist_category_translation' as table_name, COUNT(*) as row_count FROM bronze.olist_category_translation;
 
@@ -230,8 +213,6 @@ COPY bronze.olist_sellers (
 )
 FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_sellers_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
-
-UPDATE bronze.olist_sellers SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
 SELECT 'olist_sellers' as table_name, COUNT(*) as row_count FROM bronze.olist_sellers;
 
@@ -252,8 +233,6 @@ COPY bronze.olist_marketing_qualified_leads (
 )
 FROM 'C:\sql-data-warehouse-project\datasets\marketing_funnel\olist_marketing_qualified_leads_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
-
-UPDATE bronze.olist_marketing_qualified_leads SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
 SELECT 'olist_marketing_qualified_leads' as table_name, COUNT(*) as row_count FROM bronze.olist_marketing_qualified_leads;
 
@@ -280,8 +259,6 @@ COPY bronze.olist_closed_deals (
 )
 FROM 'C:\sql-data-warehouse-project\datasets\marketing_funnel\olist_closed_deals_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
-
-UPDATE bronze.olist_closed_deals SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
 SELECT 'olist_closed_deals' as table_name, COUNT(*) as row_count FROM bronze.olist_closed_deals;
 

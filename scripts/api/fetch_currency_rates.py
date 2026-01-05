@@ -158,16 +158,11 @@ def insert_rates(cursor, rates: list):
             rate_date,
             base_currency,
             target_currency,
-            exchange_rate,
-            dwh_load_date,
-            dwh_source_file
+            exchange_rate
         ) VALUES (
-            %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s
         );
     """
-
-    load_timestamp = datetime.now()
-    source_file = "frankfurter_api"
 
     for rate_date, rate_value in rates:
         cursor.execute(
@@ -177,8 +172,6 @@ def insert_rates(cursor, rates: list):
                 BASE_CURRENCY,
                 TARGET_CURRENCY,
                 str(rate_value),
-                load_timestamp,
-                source_file,
             ),
         )
 

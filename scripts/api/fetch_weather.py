@@ -238,16 +238,11 @@ def insert_weather_batch(cursor, records: list, batch_size: int = 1000):
             temperature_2m_mean,
             temperature_2m_max,
             precipitation_sum,
-            weather_code,
-            dwh_load_date,
-            dwh_source_file
+            weather_code
         ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, %s
         );
     """
-
-    load_timestamp = datetime.now()
-    source_file = "open_meteo_archive_api"
 
     total = len(records)
     inserted = 0
@@ -264,8 +259,6 @@ def insert_weather_batch(cursor, records: list, batch_size: int = 1000):
                 record["temperature_2m_max"],
                 record["precipitation_sum"],
                 record["weather_code"],
-                load_timestamp,
-                source_file,
             ),
         )
 
