@@ -34,7 +34,6 @@ timeouts and manage data efficiently.
 
 import requests
 import psycopg2
-from datetime import datetime
 import time
 from dotenv import load_dotenv
 import os
@@ -158,11 +157,15 @@ def insert_rates(cursor, rates: list):
             rate_date,
             base_currency,
             target_currency,
-            exchange_rate
+            exchange_rate,
+            dwh_load_date,
+            dwh_source_file
         ) VALUES (
-            %s, %s, %s, %s
+            %s, %s, %s, %s, CURRENT_TIMESTAMP, %s
         );
     """
+
+    source_file = "api_frankfurter"
 
     for rate_date, rate_value in rates:
         cursor.execute(
@@ -172,6 +175,7 @@ def insert_rates(cursor, rates: list):
                 BASE_CURRENCY,
                 TARGET_CURRENCY,
                 str(rate_value),
+                source_file,
             ),
         )
 

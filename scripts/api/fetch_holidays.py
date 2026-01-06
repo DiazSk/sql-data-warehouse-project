@@ -134,11 +134,15 @@ def insert_holidays(cursor, holidays: list):
             country_code,
             is_fixed,
             is_global,
-            holiday_types
+            holiday_types,
+            dwh_load_date,
+            dwh_source_file
         ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, %s
         );
     """
+
+    source_file = "api_nager_date"
 
     for holiday in holidays:
         # Extract and transform data
@@ -163,6 +167,7 @@ def insert_holidays(cursor, holidays: list):
                 is_fixed,
                 is_global,
                 holiday_types,
+                source_file,
             ),
         )
 

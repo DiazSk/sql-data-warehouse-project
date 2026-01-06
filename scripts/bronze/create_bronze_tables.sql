@@ -58,13 +58,16 @@ CREATE TABLE bronze.olist_orders (
     order_approved_at VARCHAR(50),
     order_delivered_carrier_date VARCHAR(50),
     order_delivered_customer_date VARCHAR(50),
-    order_estimated_delivery_date VARCHAR(50)
+    order_estimated_delivery_date VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_orders IS 'Raw order data - one row per customer order';
 COMMENT ON COLUMN bronze.olist_orders.order_id IS 'Unique order identifier (PK in source)';
 COMMENT ON COLUMN bronze.olist_orders.customer_id IS 'Foreign key to customers table';
 COMMENT ON COLUMN bronze.olist_orders.order_status IS 'Order status: delivered, shipped, canceled, etc.';
+COMMENT ON COLUMN bronze.olist_orders.dwh_load_date IS 'Timestamp when record was loaded into DWH';
 
 -- ----------------------------------------------------------------------------
 -- Table 2: olist_order_items
@@ -81,7 +84,9 @@ CREATE TABLE bronze.olist_order_items (
     seller_id VARCHAR(50),
     shipping_limit_date VARCHAR(50),
     price VARCHAR(50),
-    freight_value VARCHAR(50)
+    freight_value VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_order_items IS 'Raw order line items - one row per product in each order';
@@ -102,7 +107,9 @@ CREATE TABLE bronze.olist_order_payments (
     payment_sequential VARCHAR(50),
     payment_type VARCHAR(50),
     payment_installments VARCHAR(50),
-    payment_value VARCHAR(50)
+    payment_value VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_order_payments IS 'Raw payment data - one row per payment (orders can have multiple payments)';
@@ -124,7 +131,9 @@ CREATE TABLE bronze.olist_order_reviews (
     review_comment_title VARCHAR(255),
     review_comment_message TEXT,
     review_creation_date VARCHAR(50),
-    review_answer_timestamp VARCHAR(50)
+    review_answer_timestamp VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_order_reviews IS 'Raw customer review data - one review per order';
@@ -145,7 +154,9 @@ CREATE TABLE bronze.olist_order_customer (
     customer_unique_id VARCHAR(50),
     customer_zip_code_prefix VARCHAR(50),
     customer_city VARCHAR(100),
-    customer_state VARCHAR(50)
+    customer_state VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_order_customer IS 'Raw customer data - customer_id is per-order, customer_unique_id is truly unique';
@@ -165,7 +176,9 @@ CREATE TABLE bronze.olist_geolocation (
     geolocation_lat VARCHAR(50),
     geolocation_lng VARCHAR(50),
     geolocation_city VARCHAR(100),
-    geolocation_state VARCHAR(50)
+    geolocation_state VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_geolocation IS 'Raw geolocation data - multiple lat/lng points per zip code (privacy fuzzing)';
@@ -189,7 +202,9 @@ CREATE TABLE bronze.olist_products (
     product_weight_g VARCHAR(50),
     product_length_cm VARCHAR(50),
     product_height_cm VARCHAR(50),
-    product_width_cm VARCHAR(50)
+    product_width_cm VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_products IS 'Raw product catalog - category names in Portuguese, some NULLs';
@@ -206,7 +221,9 @@ DROP TABLE IF EXISTS bronze.olist_category_translation;
 
 CREATE TABLE bronze.olist_category_translation (
     product_category_name VARCHAR(255),
-    product_category_name_english VARCHAR(255)
+    product_category_name_english VARCHAR(255),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_category_translation IS 'Category name translation lookup - Portuguese to English';
@@ -223,7 +240,9 @@ CREATE TABLE bronze.olist_sellers (
     seller_id VARCHAR(50),
     seller_zip_code_prefix VARCHAR(50),
     seller_city VARCHAR(100),
-    seller_state VARCHAR(50)
+    seller_state VARCHAR(50),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_sellers IS 'Raw seller data - links to closed_deals via seller_id';
@@ -245,7 +264,9 @@ CREATE TABLE bronze.olist_marketing_qualified_leads (
     mql_id VARCHAR(50),
     first_contact_date VARCHAR(50),
     landing_page_id VARCHAR(50),
-    origin VARCHAR(100)
+    origin VARCHAR(100),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_marketing_qualified_leads IS 'Raw Marketing Qualified Leads - leads who requested contact to become sellers';
@@ -274,7 +295,9 @@ CREATE TABLE bronze.olist_closed_deals (
     average_stock VARCHAR(50),
     business_type VARCHAR(50),
     declared_product_catalog_size VARCHAR(20),
-    declared_monthly_revenue VARCHAR(20)
+    declared_monthly_revenue VARCHAR(20),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.olist_closed_deals IS 'Raw closed deals - MQLs converted to sellers. Links to olist_sellers via seller_id';
@@ -299,7 +322,9 @@ CREATE TABLE bronze.api_currency_rates (
     rate_date VARCHAR(20),
     base_currency VARCHAR(5),
     target_currency VARCHAR(5),
-    exchange_rate VARCHAR(20)
+    exchange_rate VARCHAR(20),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.api_currency_rates IS 'Raw currency exchange rates from Frankfurter API (European Central Bank data)';
@@ -320,7 +345,9 @@ CREATE TABLE bronze.api_brazil_holidays (
     country_code VARCHAR(5),
     is_fixed VARCHAR(10),
     is_global VARCHAR(10),
-    holiday_types VARCHAR(100)
+    holiday_types VARCHAR(100),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.api_brazil_holidays IS 'Raw Brazilian public holidays from Nager.Date API';
@@ -344,7 +371,9 @@ CREATE TABLE bronze.api_weather_history (
     temperature_2m_mean VARCHAR(20),
     temperature_2m_max  VARCHAR(20),
     precipitation_sum VARCHAR(20),
-    weather_code VARCHAR(10)
+    weather_code VARCHAR(10),
+    dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
 COMMENT ON TABLE bronze.api_weather_history IS 'Raw historical daily weather data from Open-Meteo Archive API (minimal columns for business analysis)';
