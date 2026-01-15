@@ -74,6 +74,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 -- Update load timestamp
 UPDATE bronze.olist_orders SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
+-- Update source file
+UPDATE bronze.olist_orders SET dwh_source_file = 'olist_orders_dataset.csv' WHERE dwh_source_file IS NULL;
+
 -- Verify load
 SELECT 'olist_orders' as table_name, COUNT(*) as row_count FROM bronze.olist_orders;
 
@@ -97,6 +100,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 -- Update load timestamp
 UPDATE bronze.olist_order_items SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
+-- Update source file
+UPDATE bronze.olist_order_items SET dwh_source_file = 'olist_order_items_dataset.csv' WHERE dwh_source_file IS NULL;
+
 SELECT 'olist_order_items' as table_name, COUNT(*) as row_count FROM bronze.olist_order_items;
 
 -- ----------------------------------------------------------------------------
@@ -116,6 +122,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
 -- Update load timestamp
 UPDATE bronze.olist_order_payments SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
+
+-- Update source file
+UPDATE bronze.olist_order_payments SET dwh_source_file = 'olist_order_payments_dataset.csv' WHERE dwh_source_file IS NULL;
 
 SELECT 'olist_order_payments' as table_name, COUNT(*) as row_count FROM bronze.olist_order_payments;
 
@@ -140,14 +149,17 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '', QUOTE '"', ESCAPE '"');
 -- Update load timestamp
 UPDATE bronze.olist_order_reviews SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
+-- Update source file
+UPDATE bronze.olist_order_reviews SET dwh_source_file = 'olist_order_reviews_dataset.csv' WHERE dwh_source_file IS NULL;
+
 SELECT 'olist_order_reviews' as table_name, COUNT(*) as row_count FROM bronze.olist_order_reviews;
 
 -- ----------------------------------------------------------------------------
 -- Table 5: olist_customers (~99,441 rows)
 -- ----------------------------------------------------------------------------
-TRUNCATE TABLE bronze.olist_order_customer;
+TRUNCATE TABLE bronze.olist_order_customers;
 
-COPY bronze.olist_order_customer (
+COPY bronze.olist_order_customers (
     customer_id,
     customer_unique_id,
     customer_zip_code_prefix,
@@ -158,9 +170,12 @@ FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_customers_dataset.
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
 -- Update load timestamp
-UPDATE bronze.olist_order_customer SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
+UPDATE bronze.olist_order_customers SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
-SELECT 'olist_customers' as table_name, COUNT(*) as row_count FROM bronze.olist_order_customer;
+-- Update source file
+UPDATE bronze.olist_order_customers SET dwh_source_file = 'olist_order_customerss_dataset.csv' WHERE dwh_source_file IS NULL;
+
+SELECT 'olist_customers' as table_name, COUNT(*) as row_count FROM bronze.olist_order_customers;
 
 -- ----------------------------------------------------------------------------
 -- Table 6: olist_geolocation (~1,000,163 rows) - LARGEST TABLE
@@ -180,6 +195,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
 -- Update load timestamp
 UPDATE bronze.olist_geolocation SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
+
+-- Update source file
+UPDATE bronze.olist_geolocation SET dwh_source_file = 'olist_geolocation_dataset.csv' WHERE dwh_source_file IS NULL;
 
 SELECT 'olist_geolocation' as table_name, COUNT(*) as row_count FROM bronze.olist_geolocation;
 
@@ -205,6 +223,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 -- Update load timestamp
 UPDATE bronze.olist_products SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
+-- Update source file
+UPDATE bronze.olist_products SET dwh_source_file = 'olist_products_dataset.csv' WHERE dwh_source_file IS NULL;
+
 SELECT 'olist_products' as table_name, COUNT(*) as row_count FROM bronze.olist_products;
 
 -- ----------------------------------------------------------------------------
@@ -221,6 +242,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
 -- Update load timestamp
 UPDATE bronze.olist_category_translation SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
+
+-- Update source file
+UPDATE bronze.olist_category_translation SET dwh_source_file = 'product_category_name_translation.csv' WHERE dwh_source_file IS NULL;
 
 SELECT 'olist_category_translation' as table_name, COUNT(*) as row_count FROM bronze.olist_category_translation;
 
@@ -240,6 +264,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
 -- Update load timestamp
 UPDATE bronze.olist_sellers SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
+
+-- Update source file
+UPDATE bronze.olist_sellers SET dwh_source_file = 'olist_sellers_dataset.csv' WHERE dwh_source_file IS NULL;
 
 SELECT 'olist_sellers' as table_name, COUNT(*) as row_count FROM bronze.olist_sellers;
 
@@ -263,6 +290,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
 -- Update load timestamp
 UPDATE bronze.olist_marketing_qualified_leads SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
+
+-- Update source file
+UPDATE bronze.olist_marketing_qualified_leads SET dwh_source_file = 'olist_marketing_qualified_leads_dataset.csv' WHERE dwh_source_file IS NULL;
 
 SELECT 'olist_marketing_qualified_leads' as table_name, COUNT(*) as row_count FROM bronze.olist_marketing_qualified_leads;
 
@@ -293,6 +323,9 @@ WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 -- Update load timestamp
 UPDATE bronze.olist_closed_deals SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
 
+-- Update source file
+UPDATE bronze.olist_closed_deals SET dwh_source_file = 'olist_closed_deals_dataset.csv' WHERE dwh_source_file IS NULL;
+
 SELECT 'olist_closed_deals' as table_name, COUNT(*) as row_count FROM bronze.olist_closed_deals;
 
 -- ============================================================================
@@ -302,10 +335,6 @@ SELECT 'olist_closed_deals' as table_name, COUNT(*) as row_count FROM bronze.oli
 -- ============================================================================
 
 -- Placeholder verification queries (data loaded by Python)
-SELECT 'api_currency_rates' as table_name, COUNT(*) as row_count FROM bronze.api_currency_rates;
-SELECT 'api_brazil_holidays' as table_name, COUNT(*) as row_count FROM bronze.api_brazil_holidays;
-SELECT 'api_weather_history' as table_name, COUNT(*) as row_count FROM bronze.api_weather_history;
-
 -- ============================================================================
 -- SECTION 4: FINAL VERIFICATION
 -- ============================================================================
@@ -345,7 +374,7 @@ BEGIN
     SELECT COUNT(*) INTO v_count FROM bronze.olist_order_reviews;
     RAISE NOTICE 'olist_order_reviews: % rows', v_count;
 
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_order_customer;
+    SELECT COUNT(*) INTO v_count FROM bronze.olist_order_customers;
     RAISE NOTICE 'olist_customers: % rows', v_count;
 
     SELECT COUNT(*) INTO v_count FROM bronze.olist_geolocation;
@@ -390,7 +419,7 @@ SELECT 'Orders with NULL order_id' as check_name, COUNT(*) as count
 FROM bronze.olist_orders WHERE order_id IS NULL;
 
 SELECT 'Customers with NULL customer_id' as check_name, COUNT(*) as count
-FROM bronze.olist_order_customer WHERE customer_id IS NULL;
+FROM bronze.olist_order_customers WHERE customer_id IS NULL;
 
 SELECT 'Products with NULL product_id' as check_name, COUNT(*) as count
 FROM bronze.olist_products WHERE product_id IS NULL;
