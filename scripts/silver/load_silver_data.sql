@@ -348,7 +348,7 @@ SELECT
     TRUE,
     NULL
 
-FROM bronze.olist_order_customer
+FROM bronze.olist_customers
 WHERE customer_id IS NOT NULL
   AND TRIM(customer_id) != '';
 
@@ -487,7 +487,7 @@ SELECT
     TRUE,
     NULL
 
-FROM bronze.olist_category_translation
+FROM bronze.product_category_name_translation
 WHERE product_category_name IS NOT NULL
   AND TRIM(product_category_name) != '';
 
@@ -544,14 +544,14 @@ GROUP BY LPAD(TRIM(geolocation_zip_code_prefix), 5, '0');
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
--- Table 10: olist_marketing_qualified_leads
+-- Table 10: olist_mql
 -- Transformations: Type casts, cleaned origin
 -- ----------------------------------------------------------------------------
-\echo 'Loading silver.olist_marketing_qualified_leads...'
+\echo 'Loading silver.olist_mql...'
 
-TRUNCATE TABLE silver.olist_marketing_qualified_leads;
+TRUNCATE TABLE silver.olist_mql;
 
-INSERT INTO silver.olist_marketing_qualified_leads (
+INSERT INTO silver.olist_mql (
     mql_id,
     first_contact_date,
     landing_page_id,
@@ -575,7 +575,7 @@ SELECT
     LOWER(TRIM(origin)),
 
     -- Metadata
-    'bronze.olist_marketing_qualified_leads',
+    'bronze.olist_mql',
     CURRENT_TIMESTAMP,
     TRUE,
     NULL
@@ -584,7 +584,7 @@ FROM bronze.olist_marketing_qualified_leads
 WHERE mql_id IS NOT NULL
   AND TRIM(mql_id) != '';
 
-\echo '  ✓ olist_marketing_qualified_leads loaded'
+\echo '  ✓ olist_mql loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 11: olist_closed_deals
@@ -885,7 +885,7 @@ SELECT 'olist_order_reviews',
     (SELECT COUNT(*) FROM silver.olist_order_reviews)
 UNION ALL
 SELECT 'olist_customers',
-    (SELECT COUNT(*) FROM bronze.olist_order_customer),
+    (SELECT COUNT(*) FROM bronze.olist_customers),
     (SELECT COUNT(*) FROM silver.olist_customers)
 UNION ALL
 SELECT 'olist_sellers',
@@ -897,16 +897,16 @@ SELECT 'olist_products',
     (SELECT COUNT(*) FROM silver.olist_products)
 UNION ALL
 SELECT 'olist_category_translation',
-    (SELECT COUNT(*) FROM bronze.olist_category_translation),
+    (SELECT COUNT(*) FROM bronze.product_category_name_translation),
     (SELECT COUNT(*) FROM silver.olist_category_translation)
 UNION ALL
 SELECT 'olist_geolocation (DEDUPLICATED!)',
     (SELECT COUNT(*) FROM bronze.olist_geolocation),
     (SELECT COUNT(*) FROM silver.olist_geolocation)
 UNION ALL
-SELECT 'olist_marketing_qualified_leads',
+SELECT 'olist_mql',
     (SELECT COUNT(*) FROM bronze.olist_marketing_qualified_leads),
-    (SELECT COUNT(*) FROM silver.olist_marketing_qualified_leads)
+    (SELECT COUNT(*) FROM silver.olist_mql)
 UNION ALL
 SELECT 'olist_closed_deals',
     (SELECT COUNT(*) FROM bronze.olist_closed_deals),

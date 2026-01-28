@@ -142,15 +142,15 @@ COMMENT ON COLUMN bronze.olist_order_reviews.review_score IS 'Rating from 1 (wor
 COMMENT ON COLUMN bronze.olist_order_reviews.review_comment_message IS 'Optional review text (often NULL)';
 
 -- ----------------------------------------------------------------------------
--- Table 5: olist_order_customers
+-- Table 5: olist_customers
 -- Description: Customer information - one row per order-customer combination
--- Source File: olist_order_customers_dataset.csv
+-- Source File: olist_customers_dataset.csv
 -- Record Count: ~99,441
 -- NOTE: customer_id is per-order; use customer_unique_id for true unique customers
 -- ----------------------------------------------------------------------------
-DROP TABLE IF EXISTS bronze.olist_order_customers;
+DROP TABLE IF EXISTS bronze.olist_customers;
 
-CREATE TABLE bronze.olist_order_customers (
+CREATE TABLE bronze.olist_customers (
     customer_id VARCHAR(50),
     customer_unique_id VARCHAR(50),
     customer_zip_code_prefix VARCHAR(50),
@@ -160,9 +160,9 @@ CREATE TABLE bronze.olist_order_customers (
     dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
-COMMENT ON TABLE bronze.olist_order_customers IS 'Raw customer data - customer_id is per-order, customer_unique_id is truly unique';
-COMMENT ON COLUMN bronze.olist_order_customers.customer_id IS 'Order-specific customer ID (FK from orders)';
-COMMENT ON COLUMN bronze.olist_order_customers.customer_unique_id IS 'True unique customer identifier for deduplication';
+COMMENT ON TABLE bronze.olist_customers IS 'Raw customer data - customer_id is per-order, customer_unique_id is truly unique';
+COMMENT ON COLUMN bronze.olist_customers.customer_id IS 'Order-specific customer ID (FK from orders)';
+COMMENT ON COLUMN bronze.olist_customers.customer_unique_id IS 'True unique customer identifier for deduplication';
 
 -- ----------------------------------------------------------------------------
 -- Table 6: olist_geolocation
@@ -213,21 +213,21 @@ COMMENT ON COLUMN bronze.olist_products.product_category_name IS 'Product catego
 COMMENT ON COLUMN bronze.olist_products.product_name_lenght IS 'Length of product name (typo preserved from source)';
 
 -- ----------------------------------------------------------------------------
--- Table 8: olist_category_translation
+-- Table 8: product_category_name_translation
 -- Description: Portuguese to English category name translations
 -- Source File: product_category_name_translation.csv
 -- Record Count: ~71
 -- ----------------------------------------------------------------------------
-DROP TABLE IF EXISTS bronze.olist_category_translation;
+DROP TABLE IF EXISTS bronze.product_category_name_translation;
 
-CREATE TABLE bronze.olist_category_translation (
+CREATE TABLE bronze.product_category_name_translation (
     product_category_name VARCHAR(255),
     product_category_name_english VARCHAR(255),
     dwh_load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dwh_source_file VARCHAR(255) DEFAULT NULL
 );
 
-COMMENT ON TABLE bronze.olist_category_translation IS 'Category name translation lookup - Portuguese to English';
+COMMENT ON TABLE bronze.product_category_name_translation IS 'Category name translation lookup - Portuguese to English';
 
 -- ----------------------------------------------------------------------------
 -- Table 9: olist_sellers
@@ -405,27 +405,23 @@ BEGIN
     RAISE NOTICE '========================================';
     RAISE NOTICE 'Bronze layer tables created successfully!';
     RAISE NOTICE '========================================';
-    RAISE NOTICE '';
     RAISE NOTICE 'E-Commerce Tables (9):';
     RAISE NOTICE '  1. bronze.olist_orders';
     RAISE NOTICE '  2. bronze.olist_order_items';
     RAISE NOTICE '  3. bronze.olist_order_payments';
     RAISE NOTICE '  4. bronze.olist_order_reviews';
-    RAISE NOTICE '  5. bronze.olist_order_customers';
+    RAISE NOTICE '  5. bronze.olist_customers';
     RAISE NOTICE '  6. bronze.olist_geolocation';
     RAISE NOTICE '  7. bronze.olist_products';
-    RAISE NOTICE '  8. bronze.olist_category_translation';
+    RAISE NOTICE '  8. bronze.product_category_name_translation';
     RAISE NOTICE '  9. bronze.olist_sellers';
-    RAISE NOTICE '';
     RAISE NOTICE 'Marketing Funnel Tables (2):';
-    RAISE NOTICE '  10. bronze.olist_mql';
+    RAISE NOTICE '  10. bronze.olist_marketing_qualified_leads';
     RAISE NOTICE '  11. bronze.olist_closed_deals';
-    RAISE NOTICE '';
     RAISE NOTICE 'API Tables (3):';
     RAISE NOTICE '  12. bronze.api_currency_rates';
     RAISE NOTICE '  13. bronze.api_brazil_holidays';
     RAISE NOTICE '  14. bronze.api_weather_history';
-    RAISE NOTICE '';
     RAISE NOTICE '========================================';
     RAISE NOTICE 'Total: 14 tables created';
     RAISE NOTICE '========================================';

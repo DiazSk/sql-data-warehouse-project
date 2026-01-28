@@ -183,14 +183,14 @@ COMMENT ON COLUMN silver.olist_order_reviews.is_positive IS 'TRUE if review_scor
 COMMENT ON COLUMN silver.olist_order_reviews.is_negative IS 'TRUE if review_score <= 2';
 
 -- ----------------------------------------------------------------------------
--- Table 5: olist_order_customers
+-- Table 5: olist_customers
 -- Description: Cleaned customer records with standardized location
--- Source: bronze.olist_order_customers
+-- Source: bronze.olist_customers
 -- Records: ~99,441
 -- ----------------------------------------------------------------------------
-DROP TABLE IF EXISTS silver.olist_order_customers CASCADE;
+DROP TABLE IF EXISTS silver.olist_customers CASCADE;
 
-CREATE TABLE silver.olist_order_customers (
+CREATE TABLE silver.olist_customers (
     -- Primary Key
     customer_id                     VARCHAR(32) PRIMARY KEY,
 
@@ -203,14 +203,14 @@ CREATE TABLE silver.olist_order_customers (
     customer_state                  VARCHAR(2) NOT NULL,
 
     -- Silver metadata
-    dwh_record_source               VARCHAR(100) DEFAULT 'bronze.olist_order_customers',
+    dwh_record_source               VARCHAR(100) DEFAULT 'bronze.olist_customers',
     dwh_transformed_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dwh_is_valid                    BOOLEAN DEFAULT TRUE,
     dwh_validation_errors           TEXT
 );
 
-COMMENT ON TABLE silver.olist_order_customers IS 'Cleaned customers with standardized location';
-COMMENT ON COLUMN silver.olist_order_customers.customer_unique_id IS 'True unique customer ID (use for repeat analysis)';
+COMMENT ON TABLE silver.olist_customers IS 'Cleaned customers with standardized location';
+COMMENT ON COLUMN silver.olist_customers.customer_unique_id IS 'True unique customer ID (use for repeat analysis)';
 
 -- ----------------------------------------------------------------------------
 -- Table 6: olist_sellers
@@ -340,14 +340,14 @@ COMMENT ON COLUMN silver.olist_geolocation.longitude IS 'Average longitude for z
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
--- Table 10: olist_marketing_qualified_leads
+-- Table 10: olist_mql
 -- Description: Cleaned Marketing Qualified Leads
--- Source: bronze.olist_marketing_qualified_leads
+-- Source: bronze.olist_mql
 -- Records: ~8,000
 -- ----------------------------------------------------------------------------
-DROP TABLE IF EXISTS silver.olist_marketing_qualified_leads CASCADE;
+DROP TABLE IF EXISTS silver.olist_mql CASCADE;
 
-CREATE TABLE silver.olist_marketing_qualified_leads (
+CREATE TABLE silver.olist_mql (
     -- Primary Key
     mql_id                          VARCHAR(32) PRIMARY KEY,
 
@@ -357,13 +357,13 @@ CREATE TABLE silver.olist_marketing_qualified_leads (
     origin                          VARCHAR(50),
 
     -- Silver metadata
-    dwh_record_source               VARCHAR(100) DEFAULT 'bronze.olist_marketing_qualified_leads',
+    dwh_record_source               VARCHAR(100) DEFAULT 'bronze.olist_mql',
     dwh_transformed_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dwh_is_valid                    BOOLEAN DEFAULT TRUE,
     dwh_validation_errors           TEXT
 );
 
-COMMENT ON TABLE silver.olist_marketing_qualified_leads IS 'Cleaned Marketing Qualified Leads';
+COMMENT ON TABLE silver.olist_mql IS 'Cleaned Marketing Qualified Leads';
 
 -- ----------------------------------------------------------------------------
 -- Table 11: olist_closed_deals
@@ -544,8 +544,8 @@ CREATE INDEX idx_silver_reviews_order ON silver.olist_order_reviews(order_id);
 CREATE INDEX idx_silver_reviews_score ON silver.olist_order_reviews(review_score);
 
 -- Customer indexes
-CREATE INDEX idx_silver_customers_unique ON silver.olist_order_customers(customer_unique_id);
-CREATE INDEX idx_silver_customers_state ON silver.olist_order_customers(customer_state);
+CREATE INDEX idx_silver_customers_unique ON silver.olist_customers(customer_unique_id);
+CREATE INDEX idx_silver_customers_state ON silver.olist_customers(customer_state);
 
 -- Seller indexes
 CREATE INDEX idx_silver_sellers_state ON silver.olist_sellers(seller_state);
@@ -582,40 +582,33 @@ ORDER BY tablename;
 
 DO $$
 BEGIN
-    RAISE NOTICE '';
     RAISE NOTICE '============================================================';
     RAISE NOTICE 'SILVER LAYER TABLES CREATED SUCCESSFULLY!';
     RAISE NOTICE '============================================================';
-    RAISE NOTICE '';
     RAISE NOTICE 'Tables created (14 total):';
-    RAISE NOTICE '';
     RAISE NOTICE 'E-Commerce (9):';
     RAISE NOTICE '  1.  silver.olist_orders                         - with delivery metrics';
     RAISE NOTICE '  2.  silver.olist_order_items                    - with item_total';
     RAISE NOTICE '  3.  silver.olist_order_payments                 - with single_payment flag';
     RAISE NOTICE '  4.  silver.olist_order_reviews                  - with sentiment flags';
-    RAISE NOTICE '  5.  silver.olist_order_customers                - standardized location';
+    RAISE NOTICE '  5.  silver.olist_customers                      - standardized location';
     RAISE NOTICE '  6.  silver.olist_sellers                        - standardized location';
     RAISE NOTICE '  7.  silver.olist_products                       - TYPOS FIXED + volume';
     RAISE NOTICE '  8.  silver.olist_category_translation';
     RAISE NOTICE '  9.  silver.olist_geolocation                    - DEDUPLICATED structure';
-    RAISE NOTICE '';
     RAISE NOTICE 'Marketing Funnel (2):';
-    RAISE NOTICE '  10. silver.olist_marketing_qualified_leads';
+    RAISE NOTICE '  10. silver.olist_mql';
     RAISE NOTICE '  11. silver.olist_closed_deals                   - with has_seller_id flag';
-    RAISE NOTICE '';
     RAISE NOTICE 'External APIs (3):';
     RAISE NOTICE '  12. silver.api_currency_rates                   - with inverse rate';
     RAISE NOTICE '  13. silver.api_brazil_holidays                  - with date components';
     RAISE NOTICE '  14. silver.api_weather_history                  - with weather category';
-    RAISE NOTICE '';
     RAISE NOTICE 'Key differences from Bronze:';
     RAISE NOTICE '  ✓ Proper data types (not all VARCHAR)';
     RAISE NOTICE '  ✓ Primary Key constraints';
     RAISE NOTICE '  ✓ Fixed column names (typos corrected)';
     RAISE NOTICE '  ✓ Derived/calculated columns added';
     RAISE NOTICE '  ✓ Performance indexes created';
-    RAISE NOTICE '';
     RAISE NOTICE 'NEXT STEP: Run load_silver_data.sql';
     RAISE NOTICE '============================================================';
 END $$;
