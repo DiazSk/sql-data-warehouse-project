@@ -87,6 +87,7 @@
 
 - [ ] Increase estimated delivery time for Northern states by X days
 - [ ] Partner with regional logistics providers in high-late-rate areas
+- [ ] Leverage early delivery advantage in marketing communications to highlight fast service
 
 ---
 
