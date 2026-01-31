@@ -1,0 +1,84 @@
+# =============================================================================
+# OLIST DATA WAREHOUSE - Docker Compose
+# =============================================================================
+# Usage:
+#   Start:    docker-compose up -d
+#   Stop:     docker-compose down
+#   Reset:    docker-compose down -v (deletes all data!)
+#   Logs:     docker-compose logs -f
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: olist_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-olist}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-olist123}
+      POSTGRES_DB: ${POSTGRES_DB:-olist_dwh}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persistent data storage
+      - postgres_data:/var/lib/postgresql/data
+      # Init scripts (runs on first start only)
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+      # Mount SQL scripts for easy access
+      - ./scripts:/scripts:ro
+      # Mount datasets
+      - ./datasets:/datasets:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-olist} -d ${POSTGRES_DB:-olist_dwh}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - olist_network
+
+  # ---------------------------------------------------------------------------
+  # pgAdmin - Database Management UI
+  # ---------------------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: olist_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@olist.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - olist_network
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  olist_network:
+    driver: bridge
+    name: olist_network
+
+# =============================================================================
+# Volumes (Persistent Storage)
+# =============================================================================
+volumes:
+  postgres_data:
+    name: olist_postgres_data
+  pgadmin_data:
+    name: olist_pgadmin_data

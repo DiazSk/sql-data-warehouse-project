@@ -1,61 +1,38 @@
 /*
 ================================================================================
-Description: Load raw data into Bronze layer tables
+BRONZE LAYER: Load Raw Data into Bronze Tables
 ================================================================================
 
 PURPOSE:
---------
-Load data from CSV files into Bronze layer tables using PostgreSQL COPY command.
-API data is loaded separately via Python scripts.
-
-LOAD STRATEGY:
---------------
-- Full Load: TRUNCATE table, then INSERT all records
-- No transformations: Data loaded exactly as-is from source files
-- All columns as VARCHAR to prevent data type errors during load
+  Load data from CSV files into Bronze layer tables using PostgreSQL COPY command.
+  API data is loaded separately via Python scripts.
 
 PREREQUISITES:
---------------
-1. Run init_database.sql (create database and schemas)
-2. Run create_bronze_tables.sql (create table structures)
-3. Download datasets from Kaggle:
-   - E-Commerce: kaggle.com/datasets/olistbr/brazilian-ecommerce
-   - Marketing: kaggle.com/datasets/olistbr/marketing-funnel-olist
-4. Place CSV files in the datasets folder
+  1. Docker environment running (docker-compose up -d)
+  2. Bronze tables created (create_bronze_tables.sql)
+  3. Datasets in /datasets/ folder (mounted via docker-compose)
 
-FILE PATHS:
------------
-Update the file paths below to match your local setup.
-Default assumes: /path/to/project/datasets/
-
-IMPORTANT:
-----------
-PostgreSQL COPY requires either:
-  A) Superuser privileges, OR
-  B) Use \copy in psql (client-side), OR
-  C) Use pg_read_server_files role
-
-For local development, use \copy in psql or import via DBeaver/pgAdmin GUI.
+USAGE:
+  docker exec -it olist_postgres psql -U olist -d olist_dwh -f /scripts/bronze/load_bronze_data.sql
 
 ================================================================================
 */
 
--- ============================================================================
--- CONFIGURATION: Update these paths to match your local setup
--- ============================================================================
+SET search_path TO bronze, public;
 
--- Option 1: Using psql variables (uncomment and set your path)
-\set data_path 'C:\sql-data-warehouse-project\datasets'
-
--- Option 2: Direct paths in COPY commands (update paths below)
+\echo '============================================================'
+\echo 'BRONZE LAYER - Loading Raw Data'
+\echo '============================================================'
 
 -- ============================================================================
--- SECTION 1: LOAD E-COMMERCE DATASET (9 tables)
+-- SECTION 1: E-COMMERCE DATASET (9 tables)
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
 -- Table 1: olist_orders (~99,441 rows)
 -- ----------------------------------------------------------------------------
+\echo ''
+\echo 'Loading bronze.olist_orders...'
 TRUNCATE TABLE bronze.olist_orders;
 
 COPY bronze.olist_orders (
@@ -68,21 +45,17 @@ COPY bronze.olist_orders (
     order_delivered_customer_date,
     order_estimated_delivery_date
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_orders_dataset.csv'
+FROM '/datasets/e-commerce/olist_orders_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_orders SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_orders SET dwh_source_file = 'olist_orders_dataset.csv' WHERE dwh_source_file IS NULL;
-
--- Verify load
-SELECT 'olist_orders' as table_name, COUNT(*) as row_count FROM bronze.olist_orders;
+\echo '  ✓ olist_orders loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 2: olist_order_items (~112,650 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_order_items...'
 TRUNCATE TABLE bronze.olist_order_items;
 
 COPY bronze.olist_order_items (
@@ -94,20 +67,17 @@ COPY bronze.olist_order_items (
     price,
     freight_value
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_order_items_dataset.csv'
+FROM '/datasets/e-commerce/olist_order_items_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_order_items SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_order_items SET dwh_source_file = 'olist_order_items_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_order_items' as table_name, COUNT(*) as row_count FROM bronze.olist_order_items;
+\echo '  ✓ olist_order_items loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 3: olist_order_payments (~103,886 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_order_payments...'
 TRUNCATE TABLE bronze.olist_order_payments;
 
 COPY bronze.olist_order_payments (
@@ -117,21 +87,17 @@ COPY bronze.olist_order_payments (
     payment_installments,
     payment_value
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_order_payments_dataset.csv'
+FROM '/datasets/e-commerce/olist_order_payments_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_order_payments SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_order_payments SET dwh_source_file = 'olist_order_payments_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_order_payments' as table_name, COUNT(*) as row_count FROM bronze.olist_order_payments;
+\echo '  ✓ olist_order_payments loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 4: olist_order_reviews (~100,000 rows)
--- NOTE: This file may have embedded commas in review text - handle carefully
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_order_reviews...'
 TRUNCATE TABLE bronze.olist_order_reviews;
 
 COPY bronze.olist_order_reviews (
@@ -143,20 +109,17 @@ COPY bronze.olist_order_reviews (
     review_creation_date,
     review_answer_timestamp
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_order_reviews_dataset.csv'
+FROM '/datasets/e-commerce/olist_order_reviews_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '', QUOTE '"', ESCAPE '"');
 
--- Update load timestamp
 UPDATE bronze.olist_order_reviews SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_order_reviews SET dwh_source_file = 'olist_order_reviews_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_order_reviews' as table_name, COUNT(*) as row_count FROM bronze.olist_order_reviews;
+\echo '  ✓ olist_order_reviews loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 5: olist_customers (~99,441 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_customers...'
 TRUNCATE TABLE bronze.olist_customers;
 
 COPY bronze.olist_customers (
@@ -166,21 +129,17 @@ COPY bronze.olist_customers (
     customer_city,
     customer_state
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_customers_dataset.csv'
+FROM '/datasets/e-commerce/olist_customers_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_customers SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_customers SET dwh_source_file = 'olist_customers_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_customers' as table_name, COUNT(*) as row_count FROM bronze.olist_customers;
+\echo '  ✓ olist_customers loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 6: olist_geolocation (~1,000,163 rows) - LARGEST TABLE
--- NOTE: This is the largest file, may take 30+ seconds to load
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_geolocation... (largest table, may take 30+ seconds)'
 TRUNCATE TABLE bronze.olist_geolocation;
 
 COPY bronze.olist_geolocation (
@@ -190,20 +149,17 @@ COPY bronze.olist_geolocation (
     geolocation_city,
     geolocation_state
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_geolocation_dataset.csv'
+FROM '/datasets/e-commerce/olist_geolocation_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_geolocation SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_geolocation SET dwh_source_file = 'olist_geolocation_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_geolocation' as table_name, COUNT(*) as row_count FROM bronze.olist_geolocation;
+\echo '  ✓ olist_geolocation loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 7: olist_products (~32,951 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_products...'
 TRUNCATE TABLE bronze.olist_products;
 
 COPY bronze.olist_products (
@@ -217,40 +173,34 @@ COPY bronze.olist_products (
     product_height_cm,
     product_width_cm
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_products_dataset.csv'
+FROM '/datasets/e-commerce/olist_products_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_products SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_products SET dwh_source_file = 'olist_products_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_products' as table_name, COUNT(*) as row_count FROM bronze.olist_products;
+\echo '  ✓ olist_products loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 8: product_category_name_translation (~71 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.product_category_name_translation...'
 TRUNCATE TABLE bronze.product_category_name_translation;
 
 COPY bronze.product_category_name_translation (
     product_category_name,
     product_category_name_english
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\product_category_name_translation.csv'
+FROM '/datasets/e-commerce/product_category_name_translation.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.product_category_name_translation SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.product_category_name_translation SET dwh_source_file = 'product_category_name_translation.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'product_category_name_translation' as table_name, COUNT(*) as row_count FROM bronze.product_category_name_translation;
+\echo '  ✓ product_category_name_translation loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 9: olist_sellers (~3,095 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_sellers...'
 TRUNCATE TABLE bronze.olist_sellers;
 
 COPY bronze.olist_sellers (
@@ -259,24 +209,21 @@ COPY bronze.olist_sellers (
     seller_city,
     seller_state
 )
-FROM 'C:\sql-data-warehouse-project\datasets\e-commerce\olist_sellers_dataset.csv'
+FROM '/datasets/e-commerce/olist_sellers_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_sellers SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_sellers SET dwh_source_file = 'olist_sellers_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_sellers' as table_name, COUNT(*) as row_count FROM bronze.olist_sellers;
+\echo '  ✓ olist_sellers loaded'
 
 -- ============================================================================
--- SECTION 2: LOAD MARKETING FUNNEL DATASET (2 tables)
+-- SECTION 2: MARKETING FUNNEL DATASET (2 tables)
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
 -- Table 10: olist_marketing_qualified_leads (~8,000 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_marketing_qualified_leads...'
 TRUNCATE TABLE bronze.olist_marketing_qualified_leads;
 
 COPY bronze.olist_marketing_qualified_leads (
@@ -285,20 +232,17 @@ COPY bronze.olist_marketing_qualified_leads (
     landing_page_id,
     origin
 )
-FROM 'C:\sql-data-warehouse-project\datasets\marketing_funnel\olist_marketing_qualified_leads_dataset.csv'
+FROM '/datasets/marketing_funnel/olist_marketing_qualified_leads_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_marketing_qualified_leads SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_marketing_qualified_leads SET dwh_source_file = 'olist_marketing_qualified_leads_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_marketing_qualified_leads' as table_name, COUNT(*) as row_count FROM bronze.olist_marketing_qualified_leads;
+\echo '  ✓ olist_marketing_qualified_leads loaded'
 
 -- ----------------------------------------------------------------------------
 -- Table 11: olist_closed_deals (~841 rows)
 -- ----------------------------------------------------------------------------
+\echo 'Loading bronze.olist_closed_deals...'
 TRUNCATE TABLE bronze.olist_closed_deals;
 
 COPY bronze.olist_closed_deals (
@@ -317,129 +261,64 @@ COPY bronze.olist_closed_deals (
     declared_product_catalog_size,
     declared_monthly_revenue
 )
-FROM 'C:\sql-data-warehouse-project\datasets\marketing_funnel\olist_closed_deals_dataset.csv'
+FROM '/datasets/marketing_funnel/olist_closed_deals_dataset.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', NULL '');
 
--- Update load timestamp
 UPDATE bronze.olist_closed_deals SET dwh_load_date = CURRENT_TIMESTAMP WHERE dwh_load_date IS NULL;
-
--- Update source file
 UPDATE bronze.olist_closed_deals SET dwh_source_file = 'olist_closed_deals_dataset.csv' WHERE dwh_source_file IS NULL;
-
-SELECT 'olist_closed_deals' as table_name, COUNT(*) as row_count FROM bronze.olist_closed_deals;
+\echo '  ✓ olist_closed_deals loaded'
 
 -- ============================================================================
--- SECTION 3: API DATA TABLES (3 tables)
--- NOTE: These are loaded via Python scripts, not COPY commands
--- See: api/fetch_currency_rates.py, api/fetch_holidays.py, api/fetch_weather.py
+-- SECTION 3: API DATA (Loaded via Python scripts)
+-- ============================================================================
+-- API tables are populated by Python scripts in /api folder:
+--   - api/fetch_currency_rates.py  → bronze.api_currency_rates
+--   - api/fetch_holidays.py        → bronze.api_brazil_holidays
+--   - api/fetch_weather.py         → bronze.api_weather_history
 -- ============================================================================
 
--- Placeholder verification queries (data loaded by Python)
 -- ============================================================================
--- SECTION 4: FINAL VERIFICATION
+-- SECTION 4: VERIFICATION
 -- ============================================================================
 
--- Summary of all Bronze tables
-SELECT
-    'bronze' as schema_name,
-    table_name,
-    (xpath('/row/cnt/text()', xml_count))[1]::text::int as row_count
-FROM (
-    SELECT
-        table_name,
-        query_to_xml(format('SELECT COUNT(*) as cnt FROM bronze.%I', table_name), false, true, '') as xml_count
-    FROM information_schema.tables
-    WHERE table_schema = 'bronze'
-) t
+\echo ''
+\echo '============================================================'
+\echo 'BRONZE LAYER - Record Counts'
+\echo '============================================================'
+
+SELECT 'olist_orders' AS table_name, COUNT(*) AS rows FROM bronze.olist_orders
+UNION ALL SELECT 'olist_order_items', COUNT(*) FROM bronze.olist_order_items
+UNION ALL SELECT 'olist_order_payments', COUNT(*) FROM bronze.olist_order_payments
+UNION ALL SELECT 'olist_order_reviews', COUNT(*) FROM bronze.olist_order_reviews
+UNION ALL SELECT 'olist_customers', COUNT(*) FROM bronze.olist_customers
+UNION ALL SELECT 'olist_geolocation', COUNT(*) FROM bronze.olist_geolocation
+UNION ALL SELECT 'olist_products', COUNT(*) FROM bronze.olist_products
+UNION ALL SELECT 'product_category_translation', COUNT(*) FROM bronze.product_category_name_translation
+UNION ALL SELECT 'olist_sellers', COUNT(*) FROM bronze.olist_sellers
+UNION ALL SELECT 'olist_mql', COUNT(*) FROM bronze.olist_marketing_qualified_leads
+UNION ALL SELECT 'olist_closed_deals', COUNT(*) FROM bronze.olist_closed_deals
 ORDER BY table_name;
 
--- Alternative: Simple count queries for each table
-DO $$
-DECLARE
-    v_count INTEGER;
-BEGIN
-    RAISE NOTICE '========================================';
-    RAISE NOTICE 'Bronze Layer Load Summary';
-    RAISE NOTICE '========================================';
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_orders;
-    RAISE NOTICE 'olist_orders: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_order_items;
-    RAISE NOTICE 'olist_order_items: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_order_payments;
-    RAISE NOTICE 'olist_order_payments: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_order_reviews;
-    RAISE NOTICE 'olist_order_reviews: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_customers;
-    RAISE NOTICE 'olist_customers: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_geolocation;
-    RAISE NOTICE 'olist_geolocation: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_products;
-    RAISE NOTICE 'olist_products: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.product_category_name_translation;
-    RAISE NOTICE 'product_category_name_translation: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_sellers;
-    RAISE NOTICE 'olist_sellers: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_marketing_qualified_leads;
-    RAISE NOTICE 'olist_marketing_qualified_leads: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.olist_closed_deals;
-    RAISE NOTICE 'olist_closed_deals: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.api_currency_rates;
-    RAISE NOTICE 'api_currency_rates: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.api_brazil_holidays;
-    RAISE NOTICE 'api_brazil_holidays: % rows', v_count;
-
-    SELECT COUNT(*) INTO v_count FROM bronze.api_weather_history;
-    RAISE NOTICE 'api_weather_history: % rows', v_count;
-
-    RAISE NOTICE '========================================';
-    RAISE NOTICE 'Bronze layer load complete!';
-    RAISE NOTICE 'Next step: Run Silver layer scripts';
-    RAISE NOTICE '========================================';
-END $$;
-
 -- ============================================================================
--- SECTION 5: DATA QUALITY SPOT CHECKS
+-- SECTION 5: DATA QUALITY CHECKS
 -- ============================================================================
 
--- Check for NULL primary keys (should be 0)
-SELECT 'Orders with NULL order_id' as check_name, COUNT(*) as count
-FROM bronze.olist_orders WHERE order_id IS NULL;
+\echo ''
+\echo 'Data Quality Checks:'
 
-SELECT 'Customers with NULL customer_id' as check_name, COUNT(*) as count
-FROM bronze.olist_customers WHERE customer_id IS NULL;
+-- Check for NULL primary keys
+SELECT 'NULL order_id' AS check_name, COUNT(*) AS count FROM bronze.olist_orders WHERE order_id IS NULL
+UNION ALL SELECT 'NULL customer_id', COUNT(*) FROM bronze.olist_customers WHERE customer_id IS NULL
+UNION ALL SELECT 'NULL product_id', COUNT(*) FROM bronze.olist_products WHERE product_id IS NULL
+UNION ALL SELECT 'NULL seller_id', COUNT(*) FROM bronze.olist_sellers WHERE seller_id IS NULL;
 
-SELECT 'Products with NULL product_id' as check_name, COUNT(*) as count
-FROM bronze.olist_products WHERE product_id IS NULL;
+-- Order date range
+\echo ''
+\echo 'Order Date Range:'
+SELECT MIN(order_purchase_timestamp) AS min_date, MAX(order_purchase_timestamp) AS max_date FROM bronze.olist_orders;
 
--- Check for known data quality issues
-SELECT 'Products with NULL category' as check_name, COUNT(*) as count
-FROM bronze.olist_products WHERE product_category_name IS NULL OR product_category_name = '';
-
--- Check date range in orders
-SELECT
-    'Order date range' as check_name,
-    MIN(order_purchase_timestamp) as min_date,
-    MAX(order_purchase_timestamp) as max_date
-FROM bronze.olist_orders;
-
--- Check marketing-to-ecommerce link
-SELECT
-    'Closed deals with matching seller_id' as check_name,
-    COUNT(*) as matched_count,
-    (SELECT COUNT(*) FROM bronze.olist_closed_deals) as total_deals,
-    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM bronze.olist_closed_deals), 2) as match_percentage
-FROM bronze.olist_closed_deals cd
-WHERE EXISTS (SELECT 1 FROM bronze.olist_sellers s WHERE s.seller_id = cd.seller_id);
+\echo ''
+\echo '============================================================'
+\echo 'BRONZE LAYER LOAD COMPLETE!'
+\echo 'Next: Run Silver layer scripts'
+\echo '============================================================'

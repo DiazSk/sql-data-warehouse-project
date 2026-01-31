@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Olist DWH",
+            "Group": "Servers",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "olist_dwh",
+            "Username": "olist",
+            "PassFile": "/pgpass",
+            "SSLMode": "prefer"
+        }
+    }
+}

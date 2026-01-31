@@ -1,6 +1,47 @@
-.\idea
-.\vscode
-__pycache__/
-*.pyc
+# =============================================================================
+# OLIST DATA WAREHOUSE - Git Ignore
+# =============================================================================
+
+# Environment files (contains secrets)
 .env
+*.env.local
+
+# Docker volumes (data is persisted in Docker volumes, not files)
+docker/volumes/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Airflow (will be added later)
+airflow/logs/
+airflow/plugins/__pycache__/
+
+# Metabase (will be added later)
+metabase-data/
+
+# Temp files
+*.tmp
+*.temp
