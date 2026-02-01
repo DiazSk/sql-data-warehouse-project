@@ -6,6 +6,9 @@
 .env
 *.env.local
 
+# Airflow logs (generated at runtime)
+airflow/logs/
+
 # Docker volumes (data is persisted in Docker volumes, not files)
 docker/volumes/
 

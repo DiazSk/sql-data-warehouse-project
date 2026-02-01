@@ -1,0 +1,15 @@
+# =============================================================================
+# OLIST DATA WAREHOUSE - Airflow Python Dependencies
+# =============================================================================
+
+# Database connection
+psycopg2-binary>=2.9.0
+
+# API requests
+requests==2.31.0
+
+# Data processing (for API scripts)
+pandas>=2.2.0
+
+# Airflow PostgreSQL provider
+apache-airflow-providers-postgres==5.7.1

@@ -8,6 +8,37 @@
 #   Logs:     docker-compose logs -f
 # =============================================================================
 
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.7.3-python3.11
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow_db
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+    # Data Warehouse connection details
+    DWH_HOST: postgres
+    DWH_PORT: 5432
+    DWH_USER: ${POSTGRES_USER:-olist}
+    DWH_PASSWORD: ${POSTGRES_PASSWORD:-olist123}
+    DWH_DATABASE: ${POSTGRES_DB:-olist_dwh}
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./api:/opt/airflow/api
+    - ./scripts:/scripts:ro
+    - ./datasets:/opt/airflow/datasets:ro
+    - ./airflow/requirements-airflow.txt:/requirements.txt
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks:
+    - olist_network
+
 services:
   # ---------------------------------------------------------------------------
   # PostgreSQL Database
@@ -65,6 +96,87 @@ services:
         condition: service_healthy
     networks:
       - olist_network
+
+  # ---------------------------------------------------------------------------
+  # Airflow Init (First-time setup)
+  # ---------------------------------------------------------------------------
+  airflow-init:
+    <<: *airflow-common
+    container_name: olist_airflow_init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        # Create directories
+        mkdir -p /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
+
+        # Create Airflow database
+        export PGPASSWORD=$${DWH_PASSWORD}
+        psql -h postgres -U $${DWH_USER} -d $${DWH_DATABASE} -c "CREATE DATABASE airflow_db" 2>/dev/null || echo "Database exists"
+        psql -h postgres -U $${DWH_USER} -d $${DWH_DATABASE} -c "CREATE USER airflow WITH PASSWORD 'airflow'" 2>/dev/null || echo "User exists"
+        psql -h postgres -U $${DWH_USER} -d airflow_db -c "GRANT ALL ON SCHEMA public TO airflow" 2>/dev/null || true
+
+        # Initialize Airflow DB
+        airflow db init
+
+        # Create admin user
+        airflow users create \
+          --username airflow \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@olist.com \
+          --password airflow || echo "User exists"
+
+        echo "============================================"
+        echo "Airflow initialization complete!"
+        echo "Login: airflow / airflow"
+        echo "============================================"
+    environment:
+      <<: *airflow-common-env
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # Airflow Webserver (UI at port 8080)
+  # ---------------------------------------------------------------------------
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: olist_airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # ---------------------------------------------------------------------------
+  # Airflow Scheduler (Executes DAGs)
+  # ---------------------------------------------------------------------------
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: olist_airflow_scheduler
+    command: scheduler
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "airflow jobs check --job-type SchedulerJob --hostname $(hostname)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
 
 # =============================================================================
 # Networks
