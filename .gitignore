@@ -42,8 +42,9 @@ logs/
 airflow/logs/
 airflow/plugins/__pycache__/
 
-# Metabase (will be added later)
-metabase-data/
+# marimo
+marimo/.venv/
+marimo/__marimo__/
 
 # Temp files
 *.tmp
